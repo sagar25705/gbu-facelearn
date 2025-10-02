@@ -25,12 +25,14 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Login />} />
-              
+            {/* Login Route - Outside Layout (No Navbar) */}
+            <Route path="/" element={<Login />} />
+            
+            {/* All Other Routes - Inside Layout (With Navbar) */}
+            <Route path="/*" element={<Layout />}>
               {/* Admin Routes */}
               <Route
-                path="/admin"
+                path="admin"
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminDashboard />
@@ -53,7 +55,7 @@ const App = () => (
               
               {/* Teacher Routes */}
               <Route
-                path="/teacher"
+                path="teacher"
                 element={
                   <ProtectedRoute allowedRoles={['teacher']}>
                     <TeacherDashboard />
@@ -63,7 +65,7 @@ const App = () => (
               
               {/* Student Routes */}
               <Route
-                path="/student"
+                path="student"
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
                     <StudentDashboard />
