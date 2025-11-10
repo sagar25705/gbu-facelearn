@@ -255,9 +255,13 @@ export default function Login() {
             <p className="text-2xl mb-4">Established by the Uttar Pradesh Gautam Buddha University Act 2002 UP Act No. 9 of 2002</p>
             <p className="text-xl">Approved by UGC under Section 12-B & NAAC accredited</p>
             <div className="mt-8">
-              <Button className="bg-purple-800 hover:bg-purple-900 text-white px-8 py-3 text-lg rounded-lg">
-                Explore Our Campus
-              </Button>
+             <Button
+  className="bg-purple-800 hover:bg-purple-900 text-white px-8 py-3 text-lg rounded-lg"
+  onClick={() => window.open("https://youtu.be/aV-XncxVM-Q?si=Ec0i6j9emHcmjnIs", "_blank")}
+>
+  Explore Our Campus
+</Button>
+
             </div>
           </div>
         </div>
