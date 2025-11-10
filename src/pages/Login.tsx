@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { User, Lock, Mail, Facebook, Twitter, Youtube, Instagram, Phone, MapPin, ChevronLeft, ChevronRight, Search, GraduationCap, BookOpen, Users, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
+import React, { useRef } from 'react';
+
 
 export default function Login() {
   const [userId, setUserId] = useState('');
@@ -64,71 +66,183 @@ export default function Login() {
 
   return (
     <div className="min-h-screen">
-      {/* Purple Header Bar - GBU Style */}
-      <div className="bg-purple-800 text-white py-2 fixed top-0 left-0 right-0 z-50">
-        <div className="container mx-auto px-4 flex justify-between items-center text-sm">
-          <div className="flex space-x-6">
-            <span>Tenders</span>
-            <span>Recruitments</span>
-            <span>Contact</span>
-            <span>Directory</span>
-            <span>Online Fee</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search" 
-                className="pl-10 pr-4 py-1 rounded text-black text-sm w-64"
-              />
-            </div>
-          </div>
+     
+{/* Main Navbar - Purple/Blue Gradient */}
+<div className="bg-gradient-to-r from-purple-700 via-purple-800 to-blue-700 shadow-lg border-b fixed top-0 left-0 right-0 z-40">
+  <div className="container mx-auto px-4 py-2">
+    <div className="flex items-center justify-between">
+      {/* Logo and Titles */}
+      <div className="flex items-center space-x-3">
+        <img 
+          src="/gbu-logo.png" 
+          alt="GBU Logo" 
+          className="w-10 h-10 object-contain"
+        />
+        <div>
+          <h1 className="text-base font-bold text-white">गौतम बुद्ध विश्वविद्यालय</h1>
+          <h2 className="text-sm font-bold text-white">GAUTAM BUDDHA UNIVERSITY</h2>
+          <p className="text-xs text-blue-200">Face Detection Attendance System</p>
         </div>
       </div>
 
-      {/* Compact Main Navbar - White */}
-      <div className="bg-white shadow-lg border-b fixed top-10 left-0 right-0 z-40">
-        <div className="container mx-auto px-4 py-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <img 
-                src="/gbu-logo.png" 
-                alt="GBU Logo" 
-                className="w-10 h-10 object-contain"
-              />
+      {/* Main Navbar Links */}
+      <div className="flex space-x-8 text-white text-sm items-center">
+        <a href="/" className="hover:text-blue-300 font-bold">Home</a>
+        {/* About Dropdown */}
+<div className="relative group">
+  <button className="hover:text-blue-300 font-bold focus:outline-none">
+    About
+  </button>
+  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-72 bg-white text-black rounded shadow-lg opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto z-50">
+    <ul className="py-4 px-3 space-y-2 text-sm">
+      <li>
+        <a href="https://www.gbu.ac.in/about/home" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+          Home
+        </a>
+      </li>
+      <li>
+        <a href="https://www.gbu.ac.in/about/vision" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+          Vision &amp; Mission
+        </a>
+      </li>
+      <li>
+        <a href="https://www.gbu.ac.in/Content/gbudata/about/Profile_ShYogiAdityanath_latest.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+          Chancellor's Profile
+        </a>
+      </li>
+      <li>
+        <a href="https://www.gbu.ac.in/GBU_VC/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+          Vice Chancellor's Message
+        </a>
+      </li>
+      <li>
+        <a href="https://www.gbu.ac.in/about/bodies" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+          Governing Bodies
+        </a>
+      </li>
+      <li>
+        <a href="https://www.gbu.ac.in/about/regulatorybodies" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+          Regulatory Bodies
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+        
+        {/* Academics Dropdown */}
+        <div className="relative group">
+          <button className="hover:text-blue-300 font-bold focus:outline-none">
+            Academics
+          </button>
+          <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[650px] bg-white text-black rounded shadow-lg opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto z-50">
+            <div className="grid grid-cols-2 gap-8 p-6">
+              {/* Left: Faculty & Academics */}
               <div>
-                <h1 className="text-base font-bold text-gray-900">गौतम बुद्ध विश्वविद्यालय</h1>
-                <h2 className="text-sm font-bold text-gray-900">GAUTAM BUDDHA UNIVERSITY</h2>
-                <p className="text-xs text-gray-600">Face Detection Attendance System</p>
+                <h3 className="text-xs font-bold text-purple-700 mb-2 uppercase">Faculty & Academic Links</h3>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <a href="https://faculty.gbu.ac.in/" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      Faculty
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/academics/academic-programmes" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      Academic Programmes (CBCS)
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://nss.gbu.ac.in/" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      National Service Scheme (NSS)
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/academics/DASA" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      Direct Admission of Students Abroad (DASA)
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/public/incubation-about" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      GBU Incubation Centre
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              
+              {/* Right: University Schools */}
+              <div>
+                <h3 className="text-xs font-bold text-purple-700 mb-2 uppercase">University Schools</h3>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <a href="https://www.gbu.ac.in/school/sob" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      School of Biotechnology
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/school/sobs" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      School of Buddhist Studies and Civilization
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/school/soe" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      School of Engineering
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/school/soh" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      School of Humanities and Social Sciences
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/USICT/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      University School of Information and Communication Technology (USICT)
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/school/soljg" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      School of Law Justice and Governance
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/school/som" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      School of Management
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://www.gbu.ac.in/school/sovs" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
+                      School of Vocational Studies and Applied Sciences
+                    </a>
+                  </li>
+                </ul>
               </div>
             </div>
-            
-            <div className="flex space-x-6 text-gray-700 text-sm">
-              <a href="#" className="hover:text-purple-800 font-medium">Home</a>
-              <a href="#" className="hover:text-purple-800 font-medium">About ▼</a>
-              <a href="#" className="hover:text-purple-800 font-medium">Academics ▼</a>
-              <a href="#" className="hover:text-purple-800 font-medium">Admissions</a>
-              <a href="#" className="hover:text-purple-800 font-medium">Portal ▼</a>
-            </div>
           </div>
         </div>
+
+        <a href="https://pravesh.gbu.ac.in/" className="hover:text-blue-300 font-bold">Admissions</a>
       </div>
+    </div>
+  </div>
+</div>
+
+
 
       {/* Full Screen Image Slider Section */}
-      <div className="relative overflow-hidden" style={{ height: '100vh', paddingTop: '100px' }}>
+     <div className="relative overflow-hidden" style={{ height: '100vh', paddingTop: '64px' }}>
+
         {sliderImages.map((image, index) => (
           <div
             key={index}
             className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
               index === currentSlide ? 'translate-x-0' : index < currentSlide ? '-translate-x-full' : 'translate-x-full'
             }`}
-            style={{
-              backgroundImage: `url(${image})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              top: '100px',
-            }}
+           style={{
+  backgroundImage: `url(${image})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  top: '64px',
+}}
+
           >
             <div className="absolute inset-0 bg-black/40"></div>
           </div>
