@@ -574,12 +574,11 @@ export default function Login() {
             <div className="space-y-4">
               <h4 className="text-base sm:text-lg font-semibold text-gray-900">Quick Links</h4>
               <ul className="space-y-2 text-xs sm:text-sm text-gray-600">
-                <li><a href="#" className="hover:text-purple-600 transition-colors">University Website</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Academic Calendar</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Student Portal</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Faculty Portal</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Tech Support</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a></li>
+                <li><a href="https://www.gbu.ac.in/" className="hover:text-purple-600 transition-colors">University Website</a></li>
+                <li><a href="https://www.gbu.ac.in/page/academicCalender" className="hover:text-purple-600 transition-colors">Academic Calendar</a></li>
+                <li><a href="https://gbu.samarth.edu.in/index.php/site/login" className="hover:text-purple-600 transition-colors">Student Portal</a></li>
+                <li><a href="https://faculty.gbu.ac.in/" className="hover:text-purple-600 transition-colors">Faculty Portal</a></li>
+               
               </ul>
             </div>
 
@@ -595,19 +594,19 @@ export default function Login() {
               
               {/* Social Media Icons */}
               <div className="flex space-x-4 pt-2">
-                <a href="#" className="text-purple-600 hover:text-purple-700 transition-colors">
+                <a href="mailto:info@gbu.ac.in" className="text-purple-600 hover:text-purple-700 transition-colors">
                   <Mail className="h-5 w-5 sm:h-6 sm:w-6" />
                 </a>
-                <a href="#" className="text-blue-600 hover:text-blue-700 transition-colors">
+                <a href="https://www.facebook.com/gbugrnoida.dic/" className="text-blue-600 hover:text-blue-700 transition-colors">
                   <Facebook className="h-5 w-5 sm:h-6 sm:w-6" />
                 </a>
-                <a href="#" className="text-blue-400 hover:text-blue-500 transition-colors">
+                <a href="https://x.com/gbugrnoida" className="text-blue-400 hover:text-blue-500 transition-colors">
                   <Twitter className="h-5 w-5 sm:h-6 sm:w-6" />
                 </a>
-                <a href="#" className="text-red-600 hover:text-red-700 transition-colors">
+                <a href="https://www.youtube.com/channel/UCOfkhzLuMRTfqSKMFr9LBCA" className="text-red-600 hover:text-red-700 transition-colors">
                   <Youtube className="h-5 w-5 sm:h-6 sm:w-6" />
                 </a>
-                <a href="#" className="text-pink-600 hover:text-pink-700 transition-colors">
+                <a href="https://www.instagram.com/" className="text-pink-600 hover:text-pink-700 transition-colors">
                   <Instagram className="h-5 w-5 sm:h-6 sm:w-6" />
                 </a>
               </div>
