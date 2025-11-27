@@ -14,6 +14,10 @@ import ViewStudents from "./pages/admin/ViewStudents";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import NotFound from "./pages/NotFound";
+// In your router file (e.g., App.tsx or routes.tsx)
+import AddTeacher from '@/pages/admin/AddTeacher';
+import ManageTeacher from '@/pages/admin/ManageTeacher';
+import ViewAllTeachers from '@/pages/admin/vieAllTeachers';
 
 const queryClient = new QueryClient();
 
@@ -42,6 +46,18 @@ const App = () => (
                 <Route
                   path="add-student"
                   element={<AddStudent />}
+                />
+                <Route
+                  path="add-teacher"
+                  element={<AddTeacher />}
+                />
+                <Route
+                  path="manage-teachers"
+                  element={<ManageTeacher />}
+                />
+                <Route
+                  path="view-teachers"
+                  element={<ViewAllTeachers />}
                 />
                 <Route
                   path="manage-students"

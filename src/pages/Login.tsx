@@ -4,13 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { User, Lock, Mail, Facebook, Twitter, Youtube, Instagram, Phone, MapPin, ChevronLeft, ChevronRight, Search, GraduationCap, BookOpen, Users, Calendar, Menu, X } from 'lucide-react';
+import { User, Lock, Mail, Facebook, Twitter, Youtube, Instagram, Phone, MapPin, ChevronLeft, ChevronRight, GraduationCap, BookOpen, Users, Calendar, Menu, X, Eye, EyeOff } from 'lucide-react'; // ✅ Added Eye, EyeOff
 import { toast } from 'sonner';
-import React, { useRef } from 'react';
+import React from 'react';
 
 export default function Login() {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // ✅ NEW: Password visibility state
   const [isLoading, setIsLoading] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -93,36 +94,12 @@ export default function Login() {
                 </button>
                 <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-72 bg-white text-black rounded shadow-lg opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto z-50">
                   <ul className="py-4 px-3 space-y-2 text-sm">
-                    <li>
-                      <a href="https://www.gbu.ac.in/about/home" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                        Home
-                      </a>
-                    </li>
-                    <li>
-                      <a href="https://www.gbu.ac.in/about/vision" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                        Vision &amp; Mission
-                      </a>
-                    </li>
-                    <li>
-                      <a href="https://www.gbu.ac.in/Content/gbudata/about/Profile_ShYogiAdityanath_latest.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                        Chancellor's Profile
-                      </a>
-                    </li>
-                    <li>
-                      <a href="https://www.gbu.ac.in/GBU_VC/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                        Vice Chancellor's Message
-                      </a>
-                    </li>
-                    <li>
-                      <a href="https://www.gbu.ac.in/about/bodies" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                        Governing Bodies
-                      </a>
-                    </li>
-                    <li>
-                      <a href="https://www.gbu.ac.in/about/regulatorybodies" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                        Regulatory Bodies
-                      </a>
-                    </li>
+                    <li><a href="https://www.gbu.ac.in/about/home" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">Home</a></li>
+                    <li><a href="https://www.gbu.ac.in/about/vision" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">Vision &amp; Mission</a></li>
+                    <li><a href="https://www.gbu.ac.in/Content/gbudata/about/Profile_ShYogiAdityanath_latest.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">Chancellor's Profile</a></li>
+                    <li><a href="https://www.gbu.ac.in/GBU_VC/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">Vice Chancellor's Message</a></li>
+                    <li><a href="https://www.gbu.ac.in/about/bodies" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">Governing Bodies</a></li>
+                    <li><a href="https://www.gbu.ac.in/about/regulatorybodies" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">Regulatory Bodies</a></li>
                   </ul>
                 </div>
               </div>
@@ -134,82 +111,27 @@ export default function Login() {
                 </button>
                 <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[650px] bg-white text-black rounded shadow-lg opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto z-50">
                   <div className="grid grid-cols-2 gap-8 p-6">
-                    {/* Left: Faculty & Academics */}
                     <div>
                       <h3 className="text-xs font-bold text-purple-700 mb-2 uppercase">Faculty & Academic Links</h3>
                       <ul className="space-y-2 text-sm">
-                        <li>
-                          <a href="https://faculty.gbu.ac.in/" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            Faculty
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/academics/academic-programmes" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            Academic Programmes (CBCS)
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://nss.gbu.ac.in/" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            National Service Scheme (NSS)
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/academics/DASA" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            Direct Admission of Students Abroad (DASA)
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/public/incubation-about" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            GBU Incubation Centre
-                          </a>
-                        </li>
+                        <li><a href="https://faculty.gbu.ac.in/" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">Faculty</a></li>
+                        <li><a href="https://www.gbu.ac.in/academics/academic-programmes" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">Academic Programmes (CBCS)</a></li>
+                        <li><a href="https://nss.gbu.ac.in/" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">National Service Scheme (NSS)</a></li>
+                        <li><a href="https://www.gbu.ac.in/academics/DASA" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">Direct Admission of Students Abroad (DASA)</a></li>
+                        <li><a href="https://www.gbu.ac.in/public/incubation-about" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">GBU Incubation Centre</a></li>
                       </ul>
                     </div>
-                    
-                    {/* Right: University Schools */}
                     <div>
                       <h3 className="text-xs font-bold text-purple-700 mb-2 uppercase">University Schools</h3>
                       <ul className="space-y-2 text-sm">
-                        <li>
-                          <a href="https://www.gbu.ac.in/school/sob" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            School of Biotechnology
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/school/sobs" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            School of Buddhist Studies and Civilization
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/school/soe" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            School of Engineering
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/school/soh" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            School of Humanities and Social Sciences
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/USICT/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            University School of Information and Communication Technology (USICT)
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/school/soljg" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            School of Law Justice and Governance
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/school/som" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            School of Management
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.gbu.ac.in/school/sovs" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">
-                            School of Vocational Studies and Applied Sciences
-                          </a>
-                        </li>
+                        <li><a href="https://www.gbu.ac.in/school/sob" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">School of Biotechnology</a></li>
+                        <li><a href="https://www.gbu.ac.in/school/sobs" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">School of Buddhist Studies and Civilization</a></li>
+                        <li><a href="https://www.gbu.ac.in/school/soe" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">School of Engineering</a></li>
+                        <li><a href="https://www.gbu.ac.in/school/soh" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">School of Humanities and Social Sciences</a></li>
+                        <li><a href="https://www.gbu.ac.in/USICT/index.html" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">University School of Information and Communication Technology (USICT)</a></li>
+                        <li><a href="https://www.gbu.ac.in/school/soljg" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">School of Law Justice and Governance</a></li>
+                        <li><a href="https://www.gbu.ac.in/school/som" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">School of Management</a></li>
+                        <li><a href="https://www.gbu.ac.in/school/sovs" target="_blank" rel="noopener noreferrer" className="hover:text-purple-700">School of Vocational Studies and Applied Sciences</a></li>
                       </ul>
                     </div>
                   </div>
@@ -236,36 +158,20 @@ export default function Login() {
               <div className="space-y-2">
                 <p className="text-white font-bold">About</p>
                 <div className="pl-4 space-y-2 text-sm">
-                  <a href="https://www.gbu.ac.in/about/home" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">
-                    Home
-                  </a>
-                  <a href="https://www.gbu.ac.in/about/vision" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">
-                    Vision & Mission
-                  </a>
-                  <a href="https://www.gbu.ac.in/Content/gbudata/about/Profile_ShYogiAdityanath_latest.pdf" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">
-                    Chancellor's Profile
-                  </a>
-                  <a href="https://www.gbu.ac.in/GBU_VC/index.html" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">
-                    Vice Chancellor's Message
-                  </a>
+                  <a href="https://www.gbu.ac.in/about/home" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">Home</a>
+                  <a href="https://www.gbu.ac.in/about/vision" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">Vision & Mission</a>
+                  <a href="https://www.gbu.ac.in/Content/gbudata/about/Profile_ShYogiAdityanath_latest.pdf" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">Chancellor's Profile</a>
+                  <a href="https://www.gbu.ac.in/GBU_VC/index.html" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">Vice Chancellor's Message</a>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <p className="text-white font-bold">Academics</p>
                 <div className="pl-4 space-y-2 text-sm">
-                  <a href="https://faculty.gbu.ac.in/" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">
-                    Faculty
-                  </a>
-                  <a href="https://www.gbu.ac.in/academics/academic-programmes" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">
-                    Academic Programmes
-                  </a>
-                  <a href="https://www.gbu.ac.in/school/soe" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">
-                    School of Engineering
-                  </a>
-                  <a href="https://www.gbu.ac.in/USICT/index.html" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">
-                    USICT
-                  </a>
+                  <a href="https://faculty.gbu.ac.in/" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">Faculty</a>
+                  <a href="https://www.gbu.ac.in/academics/academic-programmes" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">Academic Programmes</a>
+                  <a href="https://www.gbu.ac.in/school/soe" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">School of Engineering</a>
+                  <a href="https://www.gbu.ac.in/USICT/index.html" target="_blank" rel="noopener noreferrer" className="block text-blue-200 hover:text-white">USICT</a>
                 </div>
               </div>
 
@@ -294,7 +200,6 @@ export default function Login() {
           </div>
         ))}
         
-        {/* Overlay Content - Centered */}
         <div className="absolute inset-0 flex items-center justify-center text-white z-10 px-4" style={{ top: '64px' }}>
           <div className="text-center max-w-4xl">
             <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">Globally Acclaimed University in Delhi-NCR</h1>
@@ -311,34 +216,23 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Navigation Arrows */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-2 sm:left-6 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 z-20 transition-all"
-        >
+        <button onClick={prevSlide} className="absolute left-2 sm:left-6 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 z-20 transition-all">
           <ChevronLeft className="h-5 w-5 sm:h-8 sm:w-8 text-white" />
         </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-2 sm:right-6 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 z-20 transition-all"
-        >
+        <button onClick={nextSlide} className="absolute right-2 sm:right-6 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 sm:p-3 z-20 transition-all">
           <ChevronRight className="h-5 w-5 sm:h-8 sm:w-8 text-white" />
         </button>
 
-        {/* Slide Indicators */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 sm:space-x-3 z-20">
           {sliderImages.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all ${
-                index === currentSlide ? 'bg-white' : 'bg-white/50'
-              }`}
+              className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all ${index === currentSlide ? 'bg-white' : 'bg-white/50'}`}
             />
           ))}
         </div>
 
-        {/* Scroll Down Indicator */}
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-center z-20 animate-bounce">
           <div className="flex flex-col items-center">
             <span className="text-xs sm:text-sm mb-2">Scroll for Login</span>
@@ -349,14 +243,13 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Login Section with Education-themed Animated Background */}
+      {/* Login Section */}
       <div className="min-h-screen flex items-center relative overflow-hidden py-8 sm:py-0" style={{
         background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 25%, #ec4899 50%, #f59e0b 75%, #10b981 100%)',
         backgroundSize: '400% 400%',
         animation: 'gradientShift 15s ease infinite'
       }}>
-        {/* Custom CSS for gradient animation */}
-        <style jsx>{`
+        <style>{`
           @keyframes gradientShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -373,9 +266,7 @@ export default function Login() {
           }
         `}</style>
 
-        {/* Education-themed Animated Background Elements - Hidden on small screens for performance */}
         <div className="absolute inset-0 hidden md:block">
-          {/* Floating Education Icons */}
           <div className="absolute top-20 left-16 text-white/20" style={{ animation: 'float 6s ease-in-out infinite' }}>
             <GraduationCap size={60} />
           </div>
@@ -388,64 +279,18 @@ export default function Login() {
           <div className="absolute bottom-40 right-1/3 text-white/15" style={{ animation: 'float 9s ease-in-out infinite 3s' }}>
             <Calendar size={50} />
           </div>
-
-          {/* Floating Academic Elements */}
-          <div className="absolute top-60 left-1/3 w-16 h-16 border-4 border-white/20 rounded-full" style={{ animation: 'bounce 4s ease-in-out infinite' }}></div>
-          <div className="absolute top-32 right-1/4 w-12 h-12 bg-white/10 rotate-45" style={{ animation: 'float 10s ease-in-out infinite 1.5s' }}></div>
-          <div className="absolute bottom-60 left-1/5 w-20 h-20 border-4 border-white/15 rotate-12" style={{ animation: 'float 12s ease-in-out infinite 2.5s' }}></div>
-
-          {/* Geometric Shapes for College Theme */}
-          <div className="absolute top-1/4 left-1/6 w-8 h-32 bg-white/10 rounded-full" style={{ animation: 'float 8s ease-in-out infinite' }}></div>
-          <div className="absolute top-1/3 right-1/5 w-32 h-8 bg-white/10 rounded-full" style={{ animation: 'float 6s ease-in-out infinite 1s' }}></div>
-          
-          {/* Abstract College Buildings */}
-          <div className="absolute bottom-20 left-10 flex space-x-2">
-            <div className="w-4 h-20 bg-white/10 rounded-t-lg" style={{ animation: 'bounce 5s ease-in-out infinite' }}></div>
-            <div className="w-4 h-16 bg-white/15 rounded-t-lg" style={{ animation: 'bounce 5s ease-in-out infinite 0.5s' }}></div>
-            <div className="w-4 h-24 bg-white/10 rounded-t-lg" style={{ animation: 'bounce 5s ease-in-out infinite 1s' }}></div>
-          </div>
-          
-          <div className="absolute bottom-20 right-10 flex space-x-2">
-            <div className="w-4 h-18 bg-white/15 rounded-t-lg" style={{ animation: 'bounce 6s ease-in-out infinite' }}></div>
-            <div className="w-4 h-22 bg-white/10 rounded-t-lg" style={{ animation: 'bounce 6s ease-in-out infinite 0.7s' }}></div>
-            <div className="w-4 h-20 bg-white/15 rounded-t-lg" style={{ animation: 'bounce 6s ease-in-out infinite 1.3s' }}></div>
-          </div>
-
-          {/* Attendance-themed Elements */}
-          <div className="absolute top-1/2 left-8 grid grid-cols-3 gap-2 opacity-20">
-            <div className="w-3 h-3 bg-green-300 rounded-full animate-pulse"></div>
-            <div className="w-3 h-3 bg-red-300 rounded-full animate-pulse delay-200"></div>
-            <div className="w-3 h-3 bg-yellow-300 rounded-full animate-pulse delay-400"></div>
-            <div className="w-3 h-3 bg-blue-300 rounded-full animate-pulse delay-600"></div>
-            <div className="w-3 h-3 bg-purple-300 rounded-full animate-pulse delay-800"></div>
-            <div className="w-3 h-3 bg-green-300 rounded-full animate-pulse delay-1000"></div>
-          </div>
-
-          <div className="absolute top-1/2 right-8 grid grid-cols-3 gap-2 opacity-20">
-            <div className="w-3 h-3 bg-indigo-300 rounded-full animate-pulse"></div>
-            <div className="w-3 h-3 bg-pink-300 rounded-full animate-pulse delay-300"></div>
-            <div className="w-3 h-3 bg-teal-300 rounded-full animate-pulse delay-600"></div>
-            <div className="w-3 h-3 bg-orange-300 rounded-full animate-pulse delay-900"></div>
-            <div className="w-3 h-3 bg-cyan-300 rounded-full animate-pulse delay-1200"></div>
-            <div className="w-3 h-3 bg-lime-300 rounded-full animate-pulse delay-1500"></div>
-          </div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-md mx-auto">
             <div className="text-center mb-4 sm:mb-6">
               <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-md rounded-full mb-3 sm:mb-4 shadow-2xl p-2 border border-white/30">
-                <img 
-                  src="/gbu-logo.png" 
-                  alt="GBU Logo" 
-                  className="w-full h-full object-contain rounded-full"
-                />
+                <img src="/gbu-logo.png" alt="GBU Logo" className="w-full h-full object-contain rounded-full" />
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Attendance Portal</h2>
               <p className="text-sm sm:text-base md:text-lg text-white/90 drop-shadow-md">Face Detection System</p>
             </div>
 
-            {/* Compact Login Card */}
             <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-lg">
               <CardHeader className="pb-3 sm:pb-4 text-center px-4 sm:px-6">
                 <CardTitle className="text-xl sm:text-2xl text-gray-900">Sign In</CardTitle>
@@ -465,23 +310,40 @@ export default function Login() {
                         onChange={(e) => setUserId(e.target.value)}
                         className="pl-10 h-10 sm:h-11 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 text-sm sm:text-base rounded-lg transition-all"
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
 
+                  {/* ✅ UPDATED: Password field with Eye icon */}
                   <div className="space-y-2">
                     <Label htmlFor="password" className="text-gray-700 font-medium text-xs sm:text-sm">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-2.5 sm:top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"} // ✅ Toggle type
                         placeholder="Enter your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 h-10 sm:h-11 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 text-sm sm:text-base rounded-lg transition-all"
+                        className="pl-10 pr-10 h-10 sm:h-11 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 text-sm sm:text-base rounded-lg transition-all"
                         required
+                        disabled={isLoading}
                       />
+                      {/* ✅ NEW: Eye toggle button */}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                        disabled={isLoading}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
                   </div>
 
@@ -499,7 +361,6 @@ export default function Login() {
                   </Button>
                 </form>
 
-                {/* Compact Demo Credentials */}
                 <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-purple-50 rounded-lg border">
                   <p className="text-xs sm:text-sm text-gray-700 mb-2 sm:mb-3 font-medium">Demo Credentials:</p>
                   <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
@@ -523,18 +384,13 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Professional Footer */}
+      {/* Footer */}
       <footer className="bg-white border-t border-gray-200">
         <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {/* University Info */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <img 
-                  src="/gbu-logo.png" 
-                  alt="GBU Logo" 
-                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
-                />
+                <img src="/gbu-logo.png" alt="GBU Logo" className="w-10 h-10 sm:w-12 sm:h-12 object-contain" />
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-gray-900">Gautam Buddha University</h3>
                   <p className="text-xs sm:text-sm text-gray-600">Face Detection System</p>
@@ -557,7 +413,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Portal Features */}
             <div className="space-y-4">
               <h4 className="text-base sm:text-lg font-semibold text-gray-900">Portal Features</h4>
               <ul className="space-y-2 text-xs sm:text-sm text-gray-600">
@@ -570,7 +425,6 @@ export default function Login() {
               </ul>
             </div>
 
-            {/* Quick Links */}
             <div className="space-y-4">
               <h4 className="text-base sm:text-lg font-semibold text-gray-900">Quick Links</h4>
               <ul className="space-y-2 text-xs sm:text-sm text-gray-600">
@@ -578,11 +432,9 @@ export default function Login() {
                 <li><a href="https://www.gbu.ac.in/page/academicCalender" className="hover:text-purple-600 transition-colors">Academic Calendar</a></li>
                 <li><a href="https://gbu.samarth.edu.in/index.php/site/login" className="hover:text-purple-600 transition-colors">Student Portal</a></li>
                 <li><a href="https://faculty.gbu.ac.in/" className="hover:text-purple-600 transition-colors">Faculty Portal</a></li>
-               
               </ul>
             </div>
 
-            {/* Contact & Social */}
             <div className="space-y-4">
               <h4 className="text-base sm:text-lg font-semibold text-gray-900">Connect With Us</h4>
               <div className="text-xs sm:text-sm text-gray-600 space-y-2">
@@ -592,7 +444,6 @@ export default function Login() {
                 </div>
               </div>
               
-              {/* Social Media Icons */}
               <div className="flex space-x-4 pt-2">
                 <a href="mailto:info@gbu.ac.in" className="text-purple-600 hover:text-purple-700 transition-colors">
                   <Mail className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -613,7 +464,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Bottom Bar */}
           <div className="border-t border-gray-200 mt-6 sm:mt-8 pt-4 sm:pt-6 flex flex-col md:flex-row justify-between items-center text-xs sm:text-sm text-gray-600 space-y-4 md:space-y-0">
             <p className="text-center md:text-left">© 2025 - Gautam Buddha University. All Rights Reserved.</p>
             <div className="flex flex-wrap justify-center space-x-4 sm:space-x-6">
