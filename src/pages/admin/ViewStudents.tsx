@@ -3,104 +3,70 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Users, Filter } from 'lucide-react';
-import { Student } from '@/types/auth';
+import { adminAPI } from '@/services/api';
 
-// Mock data - same structure as ManageStudents
-const allStudents: Student[] = [
-  {
-    id: '1',
-    name: 'Rahul Singh',
-    rollNo: '2024CS001',
-    email: 'rahul.singh@gbu.ac.in',
-    phone: '+91 9876543210',
-    fatherName: 'Mr. Rajesh Singh',
-    school: 'School of Engineering',
-    course: 'B.Tech',
-    department: 'Computer Science',
-    semester: 3,
-    createdAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'Priya Sharma',
-    rollNo: '2024IT002',
-    email: 'priya.sharma@gbu.ac.in',
-    phone: '+91 9876543211',
-    fatherName: 'Mr. Prakash Sharma',
-    school: 'School of Engineering',
-    course: 'B.Tech',
-    department: 'Information Technology',
-    semester: 3,
-    createdAt: new Date(),
-  },
-  {
-    id: '3',
-    name: 'Amit Kumar',
-    rollNo: '2024MBA003',
-    email: 'amit.kumar@gbu.ac.in',
-    phone: '+91 9876543212',
-    fatherName: 'Mr. Arun Kumar',
-    school: 'School of Management',
-    course: 'MBA',
-    department: 'Finance',
-    semester: 2,
-    createdAt: new Date(),
-  },
-  {
-    id: '4',
-    name: 'Neha Verma',
-    rollNo: '2024LAW004',
-    email: 'neha.verma@gbu.ac.in',
-    phone: '+91 9876543213',
-    fatherName: 'Mr. Suresh Verma',
-    school: 'School of Law',
-    course: 'BA LLB',
-    department: 'Corporate Law',
-    semester: 4,
-    createdAt: new Date(),
-  },
-  {
-    id: '5',
-    name: 'Karan Mehta',
-    rollNo: '2024CS005',
-    email: 'karan.mehta@gbu.ac.in',
-    phone: '+91 9876543214',
-    fatherName: 'Mr. Vinod Mehta',
-    school: 'School of Engineering',
-    course: 'B.Tech',
-    department: 'Computer Science',
-    semester: 3,
-    createdAt: new Date(),
-  },
-];
+type StudentUI = {
+  id: string;
+  rollNo: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  school: string;
+  department: string;
+  course: string;
+  semester: number | null;
+};
 
 export default function ViewStudents() {
-  const [students] = useState<Student[]>(allStudents);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>(allStudents);
+  const [students, setStudents] = useState<StudentUI[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<StudentUI[]>([]);
   const [filters, setFilters] = useState({
     school: 'all',
     course: 'all',
     department: 'all',
   });
 
+  // Fetch from backend
+  useEffect(() => {
+    adminAPI.getStudents().then((data: any[]) => {
+      const mapped = data.map((s) => ({
+        id: s.roll_no,
+        rollNo: s.roll_no,
+        name: s.name,
+        email: s.email,
+        phone: s.phone_number,
+        school: s.school?.school_name ?? "Unknown School",
+department: s.department?.department_name ?? "Unknown Department",
+course: s.department?.school?.school_name ?? "Unknown Course",
+
+        semester: s.semester,
+      }));
+
+      setStudents(mapped);
+      setFilteredStudents(mapped);
+    });
+  }, []);
+
+  // Extract unique filter groups
   const schools = ['all', ...new Set(students.map((s) => s.school))];
   const courses = ['all', ...new Set(students.map((s) => s.course))];
   const departments = ['all', ...new Set(students.map((s) => s.department))];
 
+  // Apply filters
   useEffect(() => {
-    let filtered = [...students];
+    let list = [...students];
 
     if (filters.school !== 'all') {
-      filtered = filtered.filter((s) => s.school === filters.school);
+      list = list.filter((s) => s.school === filters.school);
     }
     if (filters.course !== 'all') {
-      filtered = filtered.filter((s) => s.course === filters.course);
+      list = list.filter((s) => s.course === filters.course);
     }
     if (filters.department !== 'all') {
-      filtered = filtered.filter((s) => s.department === filters.department);
+      list = list.filter((s) => s.department === filters.department);
     }
 
-    setFilteredStudents(filtered);
+    setFilteredStudents(list);
   }, [filters, students]);
 
   const handleFilterChange = (key: string, value: string) => {
@@ -131,12 +97,15 @@ export default function ViewStudents() {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Filters */}
           <div className="mb-6">
             <div className="flex items-center space-x-2 mb-4">
               <Filter className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">Filters</span>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* School */}
               <Select value={filters.school} onValueChange={(value) => handleFilterChange('school', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select School" />
@@ -150,6 +119,7 @@ export default function ViewStudents() {
                 </SelectContent>
               </Select>
 
+              {/* Course */}
               <Select value={filters.course} onValueChange={(value) => handleFilterChange('course', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Course" />
@@ -163,7 +133,11 @@ export default function ViewStudents() {
                 </SelectContent>
               </Select>
 
-              <Select value={filters.department} onValueChange={(value) => handleFilterChange('department', value)}>
+              {/* Department */}
+              <Select
+                value={filters.department}
+                onValueChange={(value) => handleFilterChange('department', value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Department" />
                 </SelectTrigger>
@@ -178,6 +152,7 @@ export default function ViewStudents() {
             </div>
           </div>
 
+          {/* Table */}
           <div className="rounded-lg border">
             <Table>
               <TableHeader>
@@ -186,28 +161,29 @@ export default function ViewStudents() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>School</TableHead>
-                  <TableHead>Course</TableHead>
+                  {/* <TableHead>Course</TableHead> */}
                   <TableHead>Department</TableHead>
                   <TableHead>Semester</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {filteredStudents.length > 0 ? (
-                  filteredStudents.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-medium">{student.rollNo}</TableCell>
-                      <TableCell>{student.name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{student.email}</TableCell>
-                      <TableCell>{student.school}</TableCell>
-                      <TableCell>{student.course}</TableCell>
-                      <TableCell>{student.department}</TableCell>
-                      <TableCell className="text-center">{student.semester || '-'}</TableCell>
+                  filteredStudents.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell className="font-medium">{s.rollNo}</TableCell>
+                      <TableCell>{s.name}</TableCell>
+                      <TableCell>{s.email}</TableCell>
+                      <TableCell>{s.school}</TableCell>
+                      {/* <TableCell>{s.course}</TableCell> */}
+                      <TableCell>{s.department}</TableCell>
+                      <TableCell>{s.semester ?? '-'}</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                      No students found with the selected filters
+                      No students found with selected filters
                     </TableCell>
                   </TableRow>
                 )}

@@ -16,7 +16,7 @@ interface Teacher {
   phone_number: string;
   school_id: number;
   department?: string;
-  subject_specialization?: string;
+  subject_specialisation?: string;
 }
 
 export default function ViewTeachers() {
@@ -62,7 +62,7 @@ export default function ViewTeachers() {
           phone_number: '9876543210',
           school_id: 1,
           department: 'Computer Science',
-          subject_specialization: 'Data Structures, Algorithms',
+          subject_specialisation: 'Data Structures, Algorithms',
         },
         {
           teacher_id: 2,
@@ -72,7 +72,7 @@ export default function ViewTeachers() {
           phone_number: '9876543211',
           school_id: 2,
           department: 'Management',
-          subject_specialization: 'Marketing, Strategy',
+          subject_specialisation: 'Marketing, Strategy',
         },
       ]);
     } finally {
@@ -175,12 +175,12 @@ export default function ViewTeachers() {
                         </div>
                       )}
                       
-                      {teacher.subject_specialization && (
+                      {teacher.subject_specialisation && (
                         <div className="mt-2 pt-2 border-t">
                           <p className="text-xs text-muted-foreground">
                             <strong>Specialization:</strong>
                           </p>
-                          <p className="text-xs mt-1">{teacher.subject_specialization}</p>
+                          <p className="text-xs mt-1">{teacher.subject_specialisation}</p>
                         </div>
                       )}
                     </div>

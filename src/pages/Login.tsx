@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import React from 'react';
 
 export default function Login() {
-  const [userId, setUserId] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false); // ✅ NEW: Password visibility state
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function Login() {
   // College images for slider
   const sliderImages = [
     '/college-bg.jpg',
-    '/college-image-2.jpg', 
+    '/college-image-2.jpg',
     '/college-image-3.jpg',
     '/college-image-4.jpg'
   ];
@@ -43,37 +43,36 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!userId || !password) {
-      toast.error('Please fill in all fields');
+
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
       return;
     }
-    
+
     setIsLoading(true);
 
-    // Simulate network delay
-    setTimeout(() => {
-      const success = login(userId, password);
-      if (!success) {
-        setUserId('');
-        setPassword('');
-      }
-      setIsLoading(false);
-    }, 500);
+    const success = await login(email, password);
+
+    if (!success) {
+      setEmail("");
+      setPassword("");
+    }
+
+    setIsLoading(false);
   };
 
   return (
     <div className="min-h-screen">
-     
+
       {/* Main Navbar - Purple/Blue Gradient */}
       <div className="bg-gradient-to-r from-purple-700 via-purple-800 to-blue-700 shadow-lg border-b fixed top-0 left-0 right-0 z-40">
         <div className="container mx-auto px-2 sm:px-4 py-2">
           <div className="flex items-center justify-between">
             {/* Logo and Titles */}
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <img 
-                src="/gbu-logo.png" 
-                alt="GBU Logo" 
+              <img
+                src="/gbu-logo.png"
+                alt="GBU Logo"
                 className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
               />
               <div>
@@ -86,7 +85,7 @@ export default function Login() {
             {/* Desktop Navigation Links */}
             <div className="hidden lg:flex space-x-8 text-white text-sm items-center">
               <a href="/" className="hover:text-blue-300 font-bold">Home</a>
-              
+
               {/* About Dropdown */}
               <div className="relative group">
                 <button className="hover:text-blue-300 font-bold focus:outline-none">
@@ -103,7 +102,7 @@ export default function Login() {
                   </ul>
                 </div>
               </div>
-              
+
               {/* Academics Dropdown */}
               <div className="relative group">
                 <button className="hover:text-blue-300 font-bold focus:outline-none">
@@ -142,7 +141,7 @@ export default function Login() {
             </div>
 
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className="lg:hidden text-white p-2"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -154,7 +153,7 @@ export default function Login() {
           {isMobileMenuOpen && (
             <div className="lg:hidden mt-4 pb-4 space-y-3">
               <a href="/" className="block text-white hover:text-blue-300 font-bold py-2">Home</a>
-              
+
               <div className="space-y-2">
                 <p className="text-white font-bold">About</p>
                 <div className="pl-4 space-y-2 text-sm">
@@ -186,9 +185,8 @@ export default function Login() {
         {sliderImages.map((image, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
-              index === currentSlide ? 'translate-x-0' : index < currentSlide ? '-translate-x-full' : 'translate-x-full'
-            }`}
+            className={`absolute inset-0 transition-transform duration-500 ease-in-out ${index === currentSlide ? 'translate-x-0' : index < currentSlide ? '-translate-x-full' : 'translate-x-full'
+              }`}
             style={{
               backgroundImage: `url(${image})`,
               backgroundSize: 'cover',
@@ -199,7 +197,7 @@ export default function Login() {
             <div className="absolute inset-0 bg-black/40"></div>
           </div>
         ))}
-        
+
         <div className="absolute inset-0 flex items-center justify-center text-white z-10 px-4" style={{ top: '64px' }}>
           <div className="text-center max-w-4xl">
             <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">Globally Acclaimed University in Delhi-NCR</h1>
@@ -306,8 +304,8 @@ export default function Login() {
                         id="userId"
                         type="text"
                         placeholder="Enter your User ID"
-                        value={userId}
-                        onChange={(e) => setUserId(e.target.value)}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="pl-10 h-10 sm:h-11 border-2 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 text-sm sm:text-base rounded-lg transition-all"
                         required
                         disabled={isLoading}
@@ -365,15 +363,15 @@ export default function Login() {
                   <p className="text-xs sm:text-sm text-gray-700 mb-2 sm:mb-3 font-medium">Demo Credentials:</p>
                   <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                     <div className="flex justify-between">
-                      <span className="font-semibold text-purple-800">Admin:</span> 
+                      <span className="font-semibold text-purple-800">Admin:</span>
                       <span className="text-gray-700 text-xs sm:text-sm">ADMIN001 / admin123</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="font-semibold text-purple-800">Teacher:</span> 
+                      <span className="font-semibold text-purple-800">Teacher:</span>
                       <span className="text-gray-700 text-xs sm:text-sm">TEACH001 / teacher123</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="font-semibold text-purple-800">Student:</span> 
+                      <span className="font-semibold text-purple-800">Student:</span>
                       <span className="text-gray-700 text-xs sm:text-sm">STU2024001 / student123</span>
                     </div>
                   </div>
@@ -443,7 +441,7 @@ export default function Login() {
                   <span className="break-all">attendance@gbu.ac.in</span>
                 </div>
               </div>
-              
+
               <div className="flex space-x-4 pt-2">
                 <a href="mailto:info@gbu.ac.in" className="text-purple-600 hover:text-purple-700 transition-colors">
                   <Mail className="h-5 w-5 sm:h-6 sm:w-6" />

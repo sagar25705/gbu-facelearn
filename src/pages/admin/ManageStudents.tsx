@@ -1,99 +1,123 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Search, Edit, Trash2, UserCog } from 'lucide-react';
 import { toast } from 'sonner';
-import { Student } from '@/types/auth';
+import { adminAPI } from '@/services/api';
 
-// Mock data for demonstration
-const mockStudents: Student[] = [
-  {
-    id: '1',
-    name: 'Rahul Singh',
-    rollNo: '2024CS001',
-    email: 'rahul.singh@gbu.ac.in',
-    phone: '+91 9876543210',
-    fatherName: 'Mr. Rajesh Singh',
-    school: 'School of Engineering',
-    course: 'B.Tech',
-    department: 'Computer Science',
-    createdAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'Priya Sharma',
-    rollNo: '2024IT002',
-    email: 'priya.sharma@gbu.ac.in',
-    phone: '+91 9876543211',
-    fatherName: 'Mr. Prakash Sharma',
-    school: 'School of Engineering',
-    course: 'B.Tech',
-    department: 'Information Technology',
-    createdAt: new Date(),
-  },
-  {
-    id: '3',
-    name: 'Amit Kumar',
-    rollNo: '2024MBA003',
-    email: 'amit.kumar@gbu.ac.in',
-    phone: '+91 9876543212',
-    fatherName: 'Mr. Arun Kumar',
-    school: 'School of Management',
-    course: 'MBA',
-    department: 'Finance',
-    createdAt: new Date(),
-  },
-];
+interface StudentUI {
+  rollNo: string;
+  name: string;
+  email: string | null;
+  phone_number: string | null;
+  school: string;
+  department: string;
+  course: string;
+  semester: number | null;
+}
 
 export default function ManageStudents() {
-  const [students, setStudents] = useState<Student[]>(mockStudents);
+  const [students, setStudents] = useState<StudentUI[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<StudentUI | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState<Partial<Student>>({});
+  const [editFormData, setEditFormData] = useState<Partial<StudentUI>>({});
 
+  // FETCH STUDENTS FROM BACKEND
+  useEffect(() => {
+    adminAPI.getStudents().then((data) => {
+      const mapped = data.map((s: any) => ({
+        rollNo: s.roll_no,
+        name: s.name,
+        email: s.email,
+        phone_number: s.phone_number,
+        school: s.school?.school_name ?? "Unknown",
+        department: s.department?.department_name ?? "Unknown",
+        course: s.department?.school?.school_name ?? "Unknown",
+        semester: s.semester
+      }));
+
+      setStudents(mapped);
+    }).catch(() => toast.error("Failed to load students"));
+  }, []);
+
+  // FILTER STUDENTS
   const filteredStudents = students.filter(
     (student) =>
       student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.rollNo.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleEdit = (student: Student) => {
+  // OPEN EDIT
+  const handleEdit = (student: StudentUI) => {
     setSelectedStudent(student);
     setEditFormData(student);
     setIsEditDialogOpen(true);
   };
 
-  const handleDelete = (student: Student) => {
+  // OPEN DELETE CONFIRM
+  const handleDelete = (student: StudentUI) => {
     setSelectedStudent(student);
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (selectedStudent) {
-      setStudents(students.filter((s) => s.id !== selectedStudent.id));
-      toast.success(`Student ${selectedStudent.name} has been deleted`);
-      setIsDeleteDialogOpen(false);
-      setSelectedStudent(null);
+  // DELETE STUDENT (BACKEND)
+  const confirmDelete = async () => {
+    if (!selectedStudent) return;
+
+    try {
+      await adminAPI.deleteStudent(selectedStudent.rollNo);
+      setStudents(students.filter((s) => s.rollNo !== selectedStudent.rollNo));
+      toast.success(`Deleted ${selectedStudent.name}`);
+    } catch {
+      toast.error("Failed to delete student");
     }
+
+    setIsDeleteDialogOpen(false);
+    setSelectedStudent(null);
   };
 
-  const handleUpdate = () => {
-    if (selectedStudent && editFormData) {
+  // UPDATE STUDENT (BACKEND)
+  const handleUpdate = async () => {
+    if (!selectedStudent) return;
+
+    try {
+      const payload = {
+        name: editFormData.name,
+        email: editFormData.email,
+        phone_number: editFormData.phone_number,
+        semester: selectedStudent.semester,
+        year: 1,
+        school_id: 1,
+        department_id: 1
+      };
+
+      await adminAPI.updateStudent(selectedStudent.rollNo, payload);
+
       setStudents(
         students.map((s) =>
-          s.id === selectedStudent.id ? { ...s, ...editFormData } : s
+          s.rollNo === selectedStudent.rollNo ? { ...s, ...editFormData } : s
         )
       );
-      toast.success(`Student ${editFormData.name} has been updated`);
-      setIsEditDialogOpen(false);
-      setSelectedStudent(null);
-      setEditFormData({});
+
+      toast.success("Student updated");
+    } catch {
+      toast.error("Failed to update student");
     }
+
+    setIsEditDialogOpen(false);
+    setSelectedStudent(null);
   };
 
   return (
@@ -111,6 +135,7 @@ export default function ManageStudents() {
           </CardTitle>
           <CardDescription>Search and manage student profiles</CardDescription>
         </CardHeader>
+
         <CardContent>
           <div className="mb-6">
             <div className="relative max-w-md">
@@ -131,18 +156,17 @@ export default function ManageStudents() {
                 <TableRow>
                   <TableHead>Roll No.</TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>Course</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {filteredStudents.length > 0 ? (
                   filteredStudents.map((student) => (
-                    <TableRow key={student.id}>
+                    <TableRow key={student.rollNo}>
                       <TableCell className="font-medium">{student.rollNo}</TableCell>
                       <TableCell>{student.name}</TableCell>
-                      <TableCell>{student.course}</TableCell>
                       <TableCell>{student.department}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
@@ -150,19 +174,15 @@ export default function ManageStudents() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleEdit(student)}
-                            className="flex items-center space-x-1"
                           >
-                            <Edit className="h-3 w-3" />
-                            <span>Update</span>
+                            <Edit className="h-3 w-3 mr-1" /> Update
                           </Button>
                           <Button
                             size="sm"
                             variant="destructive"
                             onClick={() => handleDelete(student)}
-                            className="flex items-center space-x-1"
                           >
-                            <Trash2 className="h-3 w-3" />
-                            <span>Delete</span>
+                            <Trash2 className="h-3 w-3 mr-1" /> Delete
                           </Button>
                         </div>
                       </TableCell>
@@ -170,8 +190,8 @@ export default function ManageStudents() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      No students found matching your search
+                    <TableCell colSpan={5} className="text-center py-8">
+                      No students found.
                     </TableCell>
                   </TableRow>
                 )}
@@ -181,17 +201,16 @@ export default function ManageStudents() {
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
+      {/* EDIT DIALOG */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Update Student</DialogTitle>
-            <DialogDescription>
-              Make changes to the student profile below
-            </DialogDescription>
+            <DialogDescription>Edit student details below.</DialogDescription>
           </DialogHeader>
+
           <div className="space-y-4">
-            <div className="space-y-2">
+            <div>
               <label className="text-sm font-medium">Name</label>
               <Input
                 value={editFormData.name || ''}
@@ -200,7 +219,8 @@ export default function ManageStudents() {
                 }
               />
             </div>
-            <div className="space-y-2">
+
+            <div>
               <label className="text-sm font-medium">Email</label>
               <Input
                 type="email"
@@ -210,43 +230,45 @@ export default function ManageStudents() {
                 }
               />
             </div>
-            <div className="space-y-2">
+
+            <div>
               <label className="text-sm font-medium">Phone</label>
               <Input
                 type="tel"
-                value={editFormData.phone || ''}
+                value={editFormData.phone_number || ''}
                 onChange={(e) =>
-                  setEditFormData({ ...editFormData, phone: e.target.value })
+                  setEditFormData({ ...editFormData, phone_number: e.target.value })
                 }
               />
             </div>
           </div>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleUpdate}>Update Student</Button>
+            <Button onClick={handleUpdate}>Update</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* DELETE CONFIRMATION */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete student{' '}
-              <span className="font-semibold">{selectedStudent?.name}</span>? This action
-              cannot be undone.
+              Delete student <strong>{selectedStudent?.name}</strong>?
+              This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
-              Delete Student
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

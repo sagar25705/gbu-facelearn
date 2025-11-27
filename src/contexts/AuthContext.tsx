@@ -1,92 +1,74 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, AuthState } from '@/types/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { authAPI } from '@/services/api';
 
-interface AuthContextType extends AuthState {
-  login: (userId: string, password: string) => boolean;
+interface AuthContextType {
+
+  user: any | null;
+  isAuthenticated: boolean;
+  login: (userId: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demonstration
-const mockUsers: Record<string, User & { password: string }> = {
-  'ADMIN001': {
-    id: 'ADMIN001',
-    name: 'Dr. Rajesh Kumar',
-    email: 'admin@gbu.ac.in',
-    role: 'admin',
-    password: 'admin123',
-  },
-  'TEACH001': {
-    id: 'TEACH001',
-    name: 'Prof. Sharma',
-    email: 'sharma@gbu.ac.in',
-    role: 'teacher',
-    department: 'Computer Science',
-    school: 'School of Engineering',
-    password: 'teacher123',
-  },
-  'STU2024001': {
-    id: 'STU2024001',
-    name: 'Rahul Singh',
-    email: 'rahul.singh@gbu.ac.in',
-    role: 'student',
-    rollNo: '2024CS001',
-    department: 'Computer Science',
-    school: 'School of Engineering',
-    course: 'B.Tech',
-    password: 'student123',
-  },
-};
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: any) => {
+  const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for saved session
-    const savedUser = localStorage.getItem('gbu_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    const saved = localStorage.getItem("gbu_user");
+    if (saved) setUser(JSON.parse(saved));
   }, []);
 
-  const login = (userId: string, password: string): boolean => {
-    const foundUser = mockUsers[userId];
-    
-    if (foundUser && foundUser.password === password) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('gbu_user', JSON.stringify(userWithoutPassword));
-      
-      // Navigate based on role
-      switch (foundUser.role) {
-        case 'admin':
-          navigate('/admin');
-          break;
-        case 'teacher':
-          navigate('/teacher');
-          break;
-        case 'student':
-          navigate('/student');
-          break;
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const data = await authAPI.login(email, password);
+
+      const roleMap: any = {
+        1: "admin",
+        2: "student",
+        3: "teacher",
+      };
+
+      const roleString = roleMap[data.role];
+      if (!roleString) {
+        toast.error("Invalid user role returned from server");
+        return false;
       }
-      
-      toast.success(`Welcome, ${foundUser.name}!`);
+
+      // Save everything
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("user_role", roleString);   // <-- FIXED
+      localStorage.setItem("gbu_user", JSON.stringify({
+        ...data,
+        role: roleString,      // <-- FIXED
+      }));
+
+      setUser({
+        ...data,
+        role: roleString,
+      });
+
+      // Navigation based on role
+      navigate(`/${roleString}`);
+
+      toast.success(`Welcome, ${data.name}!`);
       return true;
+
+    } catch (err) {
+      toast.error("Invalid credentials");
+      return false;
     }
-    
-    toast.error('Invalid credentials');
-    return false;
   };
 
+
   const logout = () => {
+    localStorage.clear();
     setUser(null);
-    localStorage.removeItem('gbu_user');
-    navigate('/');
-    toast.success('Logged out successfully');
+    navigate("/");
+    toast.success("Logged out successfully");
   };
 
   return (
@@ -94,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user,
       isAuthenticated: !!user,
       login,
-      logout,
+      logout
     }}>
       {children}
     </AuthContext.Provider>
@@ -102,9 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
 };

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Clock, Users, Hash, BookOpen, UserPlus, X, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { AttendanceRecord } from '@/types/auth';
+import { teacherAPI } from '@/services/api';
 
 const schoolSubjectMap = {
   'School of Engineering': {
@@ -82,32 +83,28 @@ export default function TeacherDashboard() {
     }
   }, [codeExpiry]);
 
-  const generateClassCode = () => {
+  const generateClassCode = async () => {
+  try {
     if (!isFormComplete) {
-      toast.error('Please select all fields');
+      toast.error("Please select all fields");
       return;
     }
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setClassCode(code);
-    setCodeExpiry(300); // 5 minutes
-    setAttendanceRecords([]);
-    toast.success(`Class code generated: ${code}`);
+    const res = await teacherAPI.generateClassCode({
+      course_code: selection.subject.split(" - ")[0],
+      class_id: 1,
+    });
 
-    // Simulate students joining
-    setTimeout(() => {
-      const mockRecord: AttendanceRecord = {
-        id: '1',
-        studentName: 'Rahul Singh',
-        rollNo: '2024CS001',
-        timestamp: new Date(),
-        subjectCode: selection.subject.split(' - ')[0],
-        subjectName: selection.subject.split(' - ')[1],
-        teacherId: 'TEACH001',
-      };
-      setAttendanceRecords([mockRecord]);
-    }, 3000);
-  };
+    setClassCode(res.unique_code);
+    setCodeExpiry(res.expires_in);
+    setAttendanceRecords([]);
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to generate class code");
+  }
+};
+
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

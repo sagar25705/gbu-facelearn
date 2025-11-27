@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Hash, Camera, CheckCircle, Loader2, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { studentAPI } from '@/services/api';
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -14,109 +15,121 @@ export default function StudentDashboard() {
   const [showCamera, setShowCamera] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+
   const [attendanceData, setAttendanceData] = useState({
     subject: '',
     subjectCode: '',
     time: '',
   });
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  // -----------------------------------------------------
+  // STEP 1: VERIFY CLASS CODE WITH REAL BACKEND API
+  // -----------------------------------------------------
   const handleProceed = async () => {
-    if (!classCode || classCode.length !== 6) {
-      toast.error('Please enter a valid 6-digit class code');
+    if (classCode.length !== 6) {
+      toast.error("Enter a valid 6-digit class code");
       return;
     }
 
     setIsProcessing(true);
-    
-    // Simulate code validation
-    setTimeout(async () => {
+
+    try {
+      const res = await studentAPI.verifyClassCode(classCode);
+
+      setAttendanceData({
+        subject: res.subject,
+        subjectCode: res.subject_code,
+        time: new Date().toLocaleString(),
+      });
+
+      setShowCamera(true);
+      await startCamera();
+
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.detail || "Invalid or expired class code");
+
+    } finally {
       setIsProcessing(false);
-      
-      // Mock validation - in real app, this would check against active codes
-      if (classCode === '123456' || classCode.length === 6) {
-        setShowCamera(true);
-        await startCamera();
-      } else {
-        toast.error('Invalid or expired class code');
-      }
-    }, 500);
+    }
   };
 
+  // -----------------------------------------------------
+  // CAMERA START & FACE DETECTION SIMULATION
+  // -----------------------------------------------------
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: 'user'
-        } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user' }
       });
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
       }
-      
-      // Start face detection after camera starts
+
       setTimeout(() => {
         setIsDetecting(true);
         simulateFaceDetection();
       }, 1000);
-    } catch (error) {
-      console.error('Camera access error:', error);
-      toast.error('Unable to access camera. Please check permissions.');
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Cannot access camera. Check permissions.");
       setShowCamera(false);
     }
   };
 
   const simulateFaceDetection = () => {
-    // Simulate face detection process
     setTimeout(() => {
       stopCamera();
-      setIsDetecting(false);
       setShowCamera(false);
-      
-      // Set mock attendance data
-      setAttendanceData({
-        subject: 'Data Structures',
-        subjectCode: 'CS201',
-        time: new Date().toLocaleString(),
-      });
-      
+      setIsDetecting(false);
       setShowConfirmation(true);
     }, 2000);
   };
 
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
     }
   };
 
-  const confirmAttendance = () => {
-    toast.success(
-      <div>
-        <p className="font-semibold">Attendance marked successfully!</p>
-        <p className="text-sm">Subject: {attendanceData.subject}</p>
-      </div>
-    );
-    
-    // Reset all states
-    setShowConfirmation(false);
-    setClassCode('');
-    setAttendanceData({ subject: '', subjectCode: '', time: '' });
-  };
-
-  // Cleanup camera on unmount
   useEffect(() => {
-    return () => {
-      stopCamera();
-    };
+    return () => stopCamera();
   }, []);
 
+  // -----------------------------------------------------
+  // STEP 3: CONFIRM ATTENDANCE (REAL BACKEND API)
+  // -----------------------------------------------------
+  const confirmAttendance = async () => {
+    try {
+      await studentAPI.markAttendance(classCode, user?.rollNo || "");
+
+      toast.success(
+        <div>
+          <p className="font-semibold">Attendance marked successfully!</p>
+          <p className="text-sm">{attendanceData.subject} ({attendanceData.subjectCode})</p>
+        </div>
+      );
+
+      // Reset UI
+      setShowConfirmation(false);
+      setClassCode('');
+      setAttendanceData({ subject: '', subjectCode: '', time: '' });
+
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || "Error marking attendance");
+    }
+  };
+
+  // -----------------------------------------------------
+  // UI
+  // -----------------------------------------------------
   return (
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center p-6">
       <Card className="w-full max-w-md shadow-xl">
@@ -125,126 +138,112 @@ export default function StudentDashboard() {
             <UserCheck className="h-8 w-8 text-primary" />
           </div>
           <CardTitle className="text-2xl">Mark Your Attendance</CardTitle>
-          <CardDescription>Enter the class code provided by your teacher</CardDescription>
+          <CardDescription>Enter the code your teacher gave you</CardDescription>
         </CardHeader>
+
         <CardContent>
           <div className="space-y-4">
+            {/* Code Input */}
             <div className="relative">
               <Hash className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
               <Input
-                type="text"
-                placeholder="Enter 6-digit class code"
+                placeholder="Enter 6-digit code"
                 value={classCode}
-                onChange={(e) => setClassCode(e.target.value.slice(0, 6))}
-                className="pl-10 text-center text-lg font-semibold tracking-wider"
                 maxLength={6}
+                onChange={(e) => setClassCode(e.target.value.replace(/\D/g, ""))}
+                className="pl-10 text-center text-lg font-semibold tracking-widest"
               />
             </div>
 
+            {/* Proceed Button */}
             <Button
               onClick={handleProceed}
               disabled={isProcessing || classCode.length !== 6}
-              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              className="w-full bg-gradient-to-r from-primary to-accent"
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Validating...
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Verifying...
                 </>
               ) : (
-                'Proceed'
+                "Proceed"
               )}
             </Button>
 
+            {/* User Info */}
             <div className="text-center text-sm text-muted-foreground">
-              <p>Welcome, <span className="font-semibold text-foreground">{user?.name}</span></p>
-              <p>Roll No: {user?.rollNo || '2024CS001'}</p>
+              <p>Welcome, <span className="font-semibold">{user?.name}</span></p>
+              <p>Roll No: {user?.rollNo}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Camera Dialog */}
+      {/* CAMERA POPUP */}
       <Dialog open={showCamera} onOpenChange={setShowCamera}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <Camera className="h-5 w-5" />
-              <span>Face Detection</span>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" /> Face Detection
             </DialogTitle>
             <DialogDescription>
-              Please position your face clearly in the camera frame
+              Hold steady while we detect your face.
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover"
-            />
-            
+
+          <div className="relative aspect-video bg-black">
+            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+
             {isDetecting && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                <div className="text-center text-white">
-                  <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
-                  <p className="text-lg font-semibold">Detecting face...</p>
-                  <p className="text-sm opacity-80">Please hold still</p>
-                </div>
+                <Loader2 className="h-12 w-12 animate-spin text-white" />
               </div>
             )}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Confirmation Dialog */}
+      {/* CONFIRMATION POPUP */}
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
+            <DialogTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
-              <span>Confirm Attendance</span>
+              Confirm Attendance
             </DialogTitle>
-            <DialogDescription>
-              Face detected successfully! Please confirm your attendance details.
-            </DialogDescription>
+            <DialogDescription>Please verify your details.</DialogDescription>
           </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Name:</span>
-                <span className="font-semibold">{user?.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Roll No:</span>
-                <span className="font-semibold">{user?.rollNo || '2024CS001'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Subject:</span>
-                <span className="font-semibold">{attendanceData.subject} ({attendanceData.subjectCode})</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Time:</span>
-                <span className="font-semibold">{attendanceData.time}</span>
-              </div>
+
+          <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+            <div className="flex justify-between">
+              <span className="text-sm text-muted-foreground">Name</span>
+              <span className="font-semibold">{user?.name}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-sm text-muted-foreground">Roll No</span>
+              <span className="font-semibold">{user?.rollNo}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-sm text-muted-foreground">Subject</span>
+              <span className="font-semibold">
+                {attendanceData.subject} ({attendanceData.subjectCode})
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-sm text-muted-foreground">Time</span>
+              <span className="font-semibold">{attendanceData.time}</span>
             </div>
           </div>
-          
-          <div className="flex space-x-3">
-            <Button
-              variant="outline"
-              onClick={() => setShowConfirmation(false)}
-              className="flex-1"
-            >
+
+          <div className="flex gap-3 pt-4">
+            <Button variant="outline" className="flex-1" onClick={() => setShowConfirmation(false)}>
               Cancel
             </Button>
-            <Button
-              onClick={confirmAttendance}
-              className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
-            >
+            <Button className="flex-1 bg-gradient-to-r from-primary to-accent" onClick={confirmAttendance}>
               Confirm & Submit
             </Button>
           </div>

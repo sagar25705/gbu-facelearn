@@ -12,15 +12,15 @@ import { adminAPI } from '@/services/api';
 export default function AddTeacher() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     phone_number: '',
-    school_id: '',
+    school_id: 0,
     department: '',
-    subject_specialization: '',
+    subject_specialisation: '',
   });
 
   const schools = [
@@ -45,38 +45,47 @@ export default function AddTeacher() {
     setIsLoading(true);
 
     try {
-      console.log('📤 Adding new teacher:', formData);
-      
-      const response = await adminAPI.addTeacher(formData);
-      
-      console.log('✅ Teacher added successfully:', response);
-      toast.success('Teacher added successfully!');
-      
-      // Reset form
+      // FIXED PAYLOAD
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        phone_number: formData.phone_number,
+        school_id: Number(formData.school_id),
+        department: formData.department.trim() || null,
+        subject_specialisation: formData.subject_specialisation.trim() || null,
+      };
+
+      console.log("📤 Final Payload Sent:", payload);
+
+      const response = await adminAPI.addTeacher(payload);
+
+      toast.success("Teacher added successfully!");
+
+      // RESET FORM — FIXED
       setFormData({
         name: '',
         email: '',
         password: '',
         phone_number: '',
-        school_id: '',
+        school_id: 0,
         department: '',
-        subject_specialization: '',
+        subject_specialisation: '',
       });
-      
-      // Navigate to view teachers page
+
       setTimeout(() => {
         navigate('/admin/view-teachers');
-      }, 1500);
-      
+      }, 1200);
+
     } catch (error: any) {
-      console.error('❌ Error adding teacher:', error);
-      
+      console.error("❌ Error adding teacher:", error);
+
       if (error.response?.status === 400) {
-        toast.error(error.response.data.detail || 'Email already registered');
+        toast.error(error.response.data.detail || "Email already registered");
       } else if (error.response?.status === 404) {
-        toast.error('School not found');
+        toast.error("School not found");
       } else {
-        toast.error('Failed to add teacher. Please try again.');
+        toast.error("Failed to add teacher. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -110,13 +119,13 @@ export default function AddTeacher() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
+                <Label>Full Name *</Label>
                 <Input
-                  id="name"
                   name="name"
-                  placeholder="Dr. Rajesh Kumar"
                   value={formData.name}
                   onChange={handleInputChange}
                   required
@@ -125,12 +134,10 @@ export default function AddTeacher() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
+                <Label>Email *</Label>
                 <Input
-                  id="email"
                   name="email"
                   type="email"
-                  placeholder="rajesh.kumar@gbu.ac.in"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
@@ -139,50 +146,47 @@ export default function AddTeacher() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
+                <Label>Password *</Label>
                 <Input
-                  id="password"
                   name="password"
                   type="password"
-                  placeholder="Enter password"
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  disabled={isLoading}
                   minLength={6}
+                  disabled={isLoading}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone_number">Phone Number *</Label>
+                <Label>Phone Number *</Label>
                 <Input
-                  id="phone_number"
                   name="phone_number"
-                  placeholder="9876543210"
+                  maxLength={10}
+                  pattern="[0-9]{10}"
                   value={formData.phone_number}
                   onChange={handleInputChange}
                   required
                   disabled={isLoading}
-                  pattern="[0-9]{10}"
-                  maxLength={10}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="school_id">School/Department *</Label>
+                <Label>School *</Label>
                 <Select
-                  value={formData.school_id}
-                  onValueChange={(value) => setFormData({ ...formData, school_id: value })}
+                  value={String(formData.school_id)}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, school_id: Number(value) })
+                  }
                   disabled={isLoading}
-                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select School" />
                   </SelectTrigger>
                   <SelectContent>
-                    {schools.map((school) => (
-                      <SelectItem key={school.id} value={school.id.toString()}>
-                        {school.name}
+                    {schools.map((s) => (
+                      <SelectItem key={s.id} value={String(s.id)}>
+                        {s.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -190,11 +194,9 @@ export default function AddTeacher() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
+                <Label>Department</Label>
                 <Input
-                  id="department"
                   name="department"
-                  placeholder="Computer Science"
                   value={formData.department}
                   onChange={handleInputChange}
                   disabled={isLoading}
@@ -202,33 +204,22 @@ export default function AddTeacher() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="subject_specialization">Subject Specialization</Label>
+                <Label>Subject Specialization</Label>
                 <Input
-                  id="subject_specialization"
-                  name="subject_specialization"
-                  placeholder="Data Structures, Algorithms, Machine Learning"
-                  value={formData.subject_specialization}
+                  name="subject_specialisation"
+                  value={formData.subject_specialisation}
                   onChange={handleInputChange}
                   disabled={isLoading}
                 />
               </div>
+
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Button
-                type="submit"
-                className="flex-1"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    Adding Teacher...
-                  </>
-                ) : (
-                  'Add Teacher'
-                )}
+              <Button type="submit" className="flex-1" disabled={isLoading}>
+                {isLoading ? "Adding..." : "Add Teacher"}
               </Button>
+
               <Button
                 type="button"
                 variant="outline"
@@ -238,6 +229,7 @@ export default function AddTeacher() {
                 Cancel
               </Button>
             </div>
+
           </form>
         </CardContent>
       </Card>
