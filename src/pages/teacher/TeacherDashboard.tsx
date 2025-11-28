@@ -65,6 +65,41 @@ export default function TeacherDashboard() {
 
   const isFormComplete = Object.values(selection).every(val => val !== '');
 
+
+  useEffect(() => {
+  if (!classCode) return;
+
+  let mounted = true;
+  const fetchLogs = async () => {
+    try {
+      const res = await teacherAPI.getLiveAttendance(classCode);
+      if (!mounted) return;
+      // map server logs to your AttendanceRecord type
+      const mapped = res.logs.map((l: any, idx: number) => ({
+        id: String(l.attendance_id),
+        studentName: l.student_name || `Roll: ${l.roll_no}`,
+        rollNo: l.roll_no,
+        timestamp: new Date(l.created_at),
+        subjectCode: res.course_code,
+        subjectName: selection.subject.split(' - ')[1] || '',
+        teacherId: String(res.teacher_id),
+      }));
+      setAttendanceRecords(mapped);
+    } catch (err) {
+      console.error('Failed to fetch live attendance', err);
+    }
+  };
+
+  // immediate fetch, then interval
+  fetchLogs();
+  const interval = setInterval(fetchLogs, 2500);
+
+  return () => {
+    mounted = false;
+    clearInterval(interval);
+  };
+}, [classCode]); // run whenever classCode changes
+
   // Timer countdown effect
   useEffect(() => {
     if (codeExpiry > 0) {

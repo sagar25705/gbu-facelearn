@@ -23,45 +23,51 @@ export const AuthProvider = ({ children }: any) => {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const data = await authAPI.login(email, password);
+  try {
+    // STEP 1 — Login
+    const loginData = await authAPI.login(email, password);
 
-      const roleMap: any = {
-        1: "admin",
-        2: "student",
-        3: "teacher",
-      };
+    localStorage.setItem("access_token", loginData.access_token);
 
-      const roleString = roleMap[data.role];
-      if (!roleString) {
-        toast.error("Invalid user role returned from server");
-        return false;
-      }
+    // STEP 2 — Fetch full user profile
+    const profile = await authAPI.getCurrentUser();
 
-      // Save everything
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("user_role", roleString);   // <-- FIXED
-      localStorage.setItem("gbu_user", JSON.stringify({
-        ...data,
-        role: roleString,      // <-- FIXED
-      }));
+    // Map roles
+    const roleMap: any = {
+      1: "admin",
+      2: "teacher",
+      3: "student",
+    };
 
-      setUser({
-        ...data,
-        role: roleString,
-      });
+    const roleString = roleMap[profile.role];
 
-      // Navigation based on role
-      navigate(`/${roleString}`);
-
-      toast.success(`Welcome, ${data.name}!`);
-      return true;
-
-    } catch (err) {
-      toast.error("Invalid credentials");
+    if (!roleString) {
+      toast.error("Invalid role");
       return false;
     }
-  };
+
+    const finalUser = {
+      ...profile,
+      role: roleString,
+    };
+
+    // STEP 3 — Save full profile
+    localStorage.setItem("gbu_user", JSON.stringify(finalUser));
+    localStorage.setItem("user_role", roleString);
+
+    // STEP 4 — setUser
+    setUser(finalUser);
+
+    navigate(`/${roleString}`);
+    toast.success(`Welcome, ${profile.name}!`);
+    return true;
+
+  } catch (err) {
+    toast.error("Invalid credentials");
+    return false;
+  }
+};
+
 
 
   const logout = () => {

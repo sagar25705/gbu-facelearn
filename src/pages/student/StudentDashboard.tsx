@@ -25,45 +25,50 @@ export default function StudentDashboard() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // -----------------------------------------------------
-  // STEP 1: VERIFY CLASS CODE WITH REAL BACKEND API
-  // -----------------------------------------------------
+  // -------------------------------
+  // 1️⃣ Validate Code → Start Camera
+  // -------------------------------
   const handleProceed = async () => {
-    if (classCode.length !== 6) {
-      toast.error("Enter a valid 6-digit class code");
+    if (!classCode || classCode.length !== 6) {
+      toast.error('Please enter a valid 6-digit class code');
       return;
     }
 
-    setIsProcessing(true);
-
     try {
-      const res = await studentAPI.verifyClassCode(classCode);
+      setIsProcessing(true);
 
+      // Validate classCode with backend
+      const result = await studentAPI.verifyClassCode(classCode);
+
+      // Attach details for confirmation popup
       setAttendanceData({
-        subject: res.subject,
-        subjectCode: res.subject_code,
+        subject: result.subject,
+        subjectCode: result.subject_code,
         time: new Date().toLocaleString(),
       });
 
+      // Open camera dialog
       setShowCamera(true);
       await startCamera();
-
     } catch (err: any) {
       console.error(err);
-      toast.error(err.response?.data?.detail || "Invalid or expired class code");
-
+      toast.error(err?.response?.data?.detail || 'Invalid or expired class code');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // -----------------------------------------------------
-  // CAMERA START & FACE DETECTION SIMULATION
-  // -----------------------------------------------------
+  // -------------------------------
+  // 2️⃣ Start Camera
+  // -------------------------------
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user' }
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: 'user',
+        },
       });
 
       if (videoRef.current) {
@@ -71,31 +76,67 @@ export default function StudentDashboard() {
         streamRef.current = stream;
       }
 
+      // Fake face detection after 1 second
       setTimeout(() => {
         setIsDetecting(true);
         simulateFaceDetection();
       }, 1000);
-
-    } catch (err) {
-      console.error(err);
-      toast.error("Cannot access camera. Check permissions.");
+    } catch (error) {
+      console.error('Camera error:', error);
+      toast.error('Cannot access camera. Please allow permissions.');
       setShowCamera(false);
     }
   };
 
+  // -------------------------------
+  // 3️⃣ Simulate Face Detection
+  // -------------------------------
   const simulateFaceDetection = () => {
     setTimeout(() => {
       stopCamera();
-      setShowCamera(false);
       setIsDetecting(false);
+      setShowCamera(false);
       setShowConfirmation(true);
     }, 2000);
   };
 
+  // -------------------------------
+  // Stop Camera
+  // -------------------------------
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
+    }
+  };
+
+  // -------------------------------
+  // 4️⃣ Confirm → Mark Attendance (REAL BACKEND CALL)
+  // -------------------------------
+  const confirmAttendance = async () => {
+    try {
+      setShowConfirmation(false);
+      setIsProcessing(true);
+
+      const payload = {
+        unique_code: classCode,
+        roll_no: user?.roll_no || "",
+
+        is_manual: false,
+      };
+
+      await studentAPI.markAttendance(payload);
+
+      toast.success('Attendance marked successfully!');
+
+      // reset UI
+      setClassCode('');
+      setAttendanceData({ subject: '', subjectCode: '', time: '' });
+    } catch (err: any) {
+      console.error('Attendance error:', err);
+      toast.error(err?.response?.data?.detail || 'Failed to mark attendance');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -103,33 +144,6 @@ export default function StudentDashboard() {
     return () => stopCamera();
   }, []);
 
-  // -----------------------------------------------------
-  // STEP 3: CONFIRM ATTENDANCE (REAL BACKEND API)
-  // -----------------------------------------------------
-  const confirmAttendance = async () => {
-    try {
-      await studentAPI.markAttendance(classCode, user?.rollNo || "");
-
-      toast.success(
-        <div>
-          <p className="font-semibold">Attendance marked successfully!</p>
-          <p className="text-sm">{attendanceData.subject} ({attendanceData.subjectCode})</p>
-        </div>
-      );
-
-      // Reset UI
-      setShowConfirmation(false);
-      setClassCode('');
-      setAttendanceData({ subject: '', subjectCode: '', time: '' });
-
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Error marking attendance");
-    }
-  };
-
-  // -----------------------------------------------------
-  // UI
-  // -----------------------------------------------------
   return (
     <div className="min-h-[calc(100vh-180px)] flex items-center justify-center p-6">
       <Card className="w-full max-w-md shadow-xl">
@@ -138,20 +152,21 @@ export default function StudentDashboard() {
             <UserCheck className="h-8 w-8 text-primary" />
           </div>
           <CardTitle className="text-2xl">Mark Your Attendance</CardTitle>
-          <CardDescription>Enter the code your teacher gave you</CardDescription>
+          <CardDescription>Enter the class code provided by your teacher</CardDescription>
         </CardHeader>
 
         <CardContent>
           <div className="space-y-4">
-            {/* Code Input */}
+            {/* Class Code Input */}
             <div className="relative">
               <Hash className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Enter 6-digit code"
+                type="text"
+                placeholder="Enter 6-digit class code"
                 value={classCode}
+                onChange={(e) => setClassCode(e.target.value.slice(0, 6))}
+                className="pl-10 text-center text-lg font-semibold tracking-wider"
                 maxLength={6}
-                onChange={(e) => setClassCode(e.target.value.replace(/\D/g, ""))}
-                className="pl-10 text-center text-lg font-semibold tracking-widest"
               />
             </div>
 
@@ -159,91 +174,82 @@ export default function StudentDashboard() {
             <Button
               onClick={handleProceed}
               disabled={isProcessing || classCode.length !== 6}
-              className="w-full bg-gradient-to-r from-primary to-accent"
+              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Verifying...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Validating...
                 </>
               ) : (
-                "Proceed"
+                'Proceed'
               )}
             </Button>
 
-            {/* User Info */}
             <div className="text-center text-sm text-muted-foreground">
-              <p>Welcome, <span className="font-semibold">{user?.name}</span></p>
-              <p>Roll No: {user?.rollNo}</p>
+              <p>
+                Welcome,{' '}
+                <span className="font-semibold text-foreground">{user?.name}</span>
+              </p>
+              <p>Roll No: {user?.roll_no}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* CAMERA POPUP */}
+      {/* Camera Dialog */}
       <Dialog open={showCamera} onOpenChange={setShowCamera}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5" /> Face Detection
+            <DialogTitle className="flex items-center space-x-2">
+              <Camera className="h-5 w-5" />
+              <span>Face Detection</span>
             </DialogTitle>
             <DialogDescription>
-              Hold steady while we detect your face.
+              Position your face clearly in the camera frame.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="relative aspect-video bg-black">
+          <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
             <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
 
             {isDetecting && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                <Loader2 className="h-12 w-12 animate-spin text-white" />
+                <div className="text-center text-white">
+                  <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
+                  <p className="text-lg font-semibold">Detecting face...</p>
+                  <p className="text-sm opacity-80">Please hold still</p>
+                </div>
               </div>
             )}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* CONFIRMATION POPUP */}
+      {/* Confirmation Dialog */}
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center space-x-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
-              Confirm Attendance
+              <span>Confirm Attendance</span>
             </DialogTitle>
-            <DialogDescription>Please verify your details.</DialogDescription>
+            <DialogDescription>Confirm your attendance details below.</DialogDescription>
           </DialogHeader>
 
-          <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Name</span>
-              <span className="font-semibold">{user?.name}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Roll No</span>
-              <span className="font-semibold">{user?.rollNo}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Subject</span>
-              <span className="font-semibold">
-                {attendanceData.subject} ({attendanceData.subjectCode})
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Time</span>
-              <span className="font-semibold">{attendanceData.time}</span>
-            </div>
+          <div className="bg-muted/50 rounded-lg p-4 space-y-2 my-4">
+            <div className="flex justify-between"><span>Name:</span><span>{user?.name}</span></div>
+            <div className="flex justify-between"><span>Roll No:</span><span>{user?.roll_no}</span></div>
+            <div className="flex justify-between"><span>Subject:</span><span>{attendanceData.subject} ({attendanceData.subjectCode})</span></div>
+            <div className="flex justify-between"><span>Time:</span><span>{attendanceData.time}</span></div>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button variant="outline" className="flex-1" onClick={() => setShowConfirmation(false)}>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => setShowConfirmation(false)} className="flex-1">
               Cancel
             </Button>
-            <Button className="flex-1 bg-gradient-to-r from-primary to-accent" onClick={confirmAttendance}>
+
+            <Button onClick={confirmAttendance} className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90">
               Confirm & Submit
             </Button>
           </div>

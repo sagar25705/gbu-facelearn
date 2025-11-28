@@ -70,8 +70,6 @@ export const authAPI = {
 
 // ==================== ADMIN APIs ====================
 export const adminAPI = {
-
-  
   // Add new student
   addStudent: async (studentData: any) => {
     const response = await apiClient.post('/add-student', studentData);
@@ -133,58 +131,50 @@ export const adminAPI = {
 // ==================== TEACHER APIs ====================
 export const teacherAPI = {
   // Generate class code
-  generateClassCode: async (payload: any) => {
-    const res = await apiClient.post("/attendance/generate", payload);
-    return res.data;
+  generateClassCode: async (classDetails: any) => {
+    const response = await apiClient.post('/attendance/generate', classDetails);
+    return response.data;
   },
-
-  // Live attendance (not implemented yet in backend)
-  // Placeholder
-  getLiveAttendance: async (code: string) => {
-    const res = await apiClient.get(`/attendance/live/${code}`);
-    return res.data;
+  
+  // Get live attendance for a class
+  getLiveAttendance: async (classCode: string) => {
+    const response = await apiClient.get(`/teacher/attendance/${classCode}`);
+    return response.data;
   },
-
-  // Submit final attendance (not implemented yet)
-  submitAttendance: async (code: string) => {
-    const res = await apiClient.post(`/attendance/submit/${code}`);
-    return res.data;
+  
+  // Submit final attendance
+  submitAttendance: async (classCode: string) => {
+    const response = await apiClient.post(`/teacher/submit-attendance/${classCode}`);
+    return response.data;
   },
-
-  // Remove attendance log
-  removeAttendance: async (attendanceId: number) => {
-    const res = await apiClient.delete(`/attendance/log/${attendanceId}`);
-    return res.data;
+  
+  // Remove student from attendance (proxy)
+  removeAttendance: async (attendanceId: string) => {
+    const response = await apiClient.delete(`/teacher/attendance/${attendanceId}`);
+    return response.data;
   },
-
-  // Manual add
-  addManualAttendance: async (unique_code: string, roll_no: string) => {
-    const res = await apiClient.post(`/attendance/mark`, {
-      unique_code,
-      roll_no,
-      is_manual: true,
+  
+  // Add student manually
+  addManualAttendance: async (classCode: string, rollNo: string) => {
+    const response = await apiClient.post(`/teacher/attendance/manual`, {
+      class_code: classCode,
+      roll_no: rollNo,
     });
-    return res.data;
+    return response.data;
   },
 };
 
 // ==================== STUDENT APIs ====================
 export const studentAPI = {
-  // Validate class code
   verifyClassCode: async (classCode: string) => {
-    const res = await apiClient.get(`/attendance/validate/${classCode}`);
-    return res.data;
+    const response = await apiClient.get(`/attendance/validate/${classCode}`);
+    return response.data;
   },
 
-  // Mark attendance
-  markAttendance: async (unique_code: string, roll_no: string) => {
-    const res = await apiClient.post("/attendance/mark", {
-      unique_code,
-      roll_no,
-      is_manual: false,
-    });
-    return res.data;
-  },
+  markAttendance: async (payload: { unique_code: string, roll_no: string, is_manual: boolean }) => {
+    const response = await apiClient.post('/attendance/mark', payload);
+    return response.data;
+  }
 };
 
 

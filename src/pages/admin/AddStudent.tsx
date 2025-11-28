@@ -160,10 +160,11 @@ export default function AddStudent() {
       console.log("Add-student response:", studentRes?.data);
 
       if (!realPassword) {
-        // Defensive: if backend didn't return temp password, abort email step
-        toast.error("Student created but temporary password missing from server response.");
-        // still proceed to enroll face images (student exists) — but do not attempt to email
-      }
+    toast.error("Student created but temporary password missing...");
+    setLoading(false);
+    return;   // ← STOP EXECUTION
+}
+
 
       // STEP 2 — Upload Photos for Face Recognition (use exported helper)
       try {
@@ -350,7 +351,7 @@ function InputField({ label, name, value, onChange, type = "text" }: any) {
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <Input name={name} value={value} type={type} onChange={onChange} required />
+      <Input name={name} value={value} type={type} onChange={onChange} />
     </div>
   );
 }
