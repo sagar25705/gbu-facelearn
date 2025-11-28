@@ -70,6 +70,10 @@ export const authAPI = {
 
 // ==================== ADMIN APIs ====================
 export const adminAPI = {
+   getData: async () => {
+    const res = await apiClient.get("/admin/stats");
+    return res.data;
+  },
   // Add new student
   addStudent: async (studentData: any) => {
     const response = await apiClient.post('/add-student', studentData);
@@ -212,6 +216,7 @@ export const faceRecognitionAPI = {
     const response = await apiClient.get(`/face-recognition/student-status/${rollNo}`);
     return response.data;
   },
+
   
   // Get face recognition stats
   getStats: async () => {
